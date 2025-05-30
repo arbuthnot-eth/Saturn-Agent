@@ -1,0 +1,18 @@
+preferred_provider: cloudflare
+
+providers:
+  cloudflare:
+    api_key: CLOUDFLARE_API_TOKEN # Instructs config.py to read env var CLOUDFLARE_API_TOKEN
+    endpoint: 6a10ee79fe9d21b5e2c3155ce8690742 # Retained, might be used as Account ID if base_url is not primary
+    gateway_id: saturn-gateway # Retained, might be ignored if base_url is used
+    model: "@cf/baai/bge-base-en-v1.5" # Changed to 768 dimension model
+    base_url: https://api.cloudflare.com/client/v4/accounts/6a10ee79fe9d21b5e2c3155ce8690742/ai/run/@cf/baai/bge-base-en-v1.5 # Updated base_url model
+#  openrouter:
+
+#  openai:
+
+#  gemini:
+
+#  azure_openai:
+
+#  snowflake:

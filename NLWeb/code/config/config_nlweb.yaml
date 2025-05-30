@@ -1,0 +1,19 @@
+# NLWeb Configuration
+# This file contains settings specific to the NLWeb functionality
+
+# Comma-separated list of allowed sites, if you have multiple sites
+# in your store and want to restrict search to some sites. Defaults 
+# to all, for now.
+sites: "bbcnews"
+
+default_site: "all" # Default site to use if not specified in query
+
+# Data folders for JSON files and embeddings
+data_folders:
+  json_data: "./data/json"
+  json_with_embeddings: "./data/json_with_embeddings"
+
+# Chatbot formatting instructions
+chatbot_instructions:
+  # Instructions for formatting search results
+  search_results: "IMPORTANT: When presenting these results to the user, always include the original URL as a clickable link for each item."

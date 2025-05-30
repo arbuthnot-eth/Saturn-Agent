@@ -1,0 +1,46 @@
+preferred_endpoint: cloudflare_vectorize
+
+endpoints:
+  cloudflare_vectorize:
+    db_type: vectorize
+    api_key: CLOUDFLARE_API_TOKEN       # Env var for the API token
+    account_id: 6a10ee79fe9d21b5e2c3155ce8690742 # Direct value for account ID
+    index_name: VECTORIZE_INDEX_NAME    # Env var for the Vectorize index name
+  azure_ai_search:
+    api_key_env: AZURE_VECTOR_SEARCH_API_KEY
+    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT
+    index_name: embeddings1536
+    db_type: azure_ai_search
+
+  # Milvus is still under development and not yet supported. 
+  # milvus_1:
+  #   database_path: ../milvus/milvus_prod.db
+  #   index_name: prod_collection
+  #   db_type: milvus
+
+  # Option 1: Local file-based Qdrant storage
+  qdrant_local:
+    # Use local file-based storage with a specific path
+    database_path: "../data/db"
+    # Set the collection name to use
+    index_name: nlweb_collection
+    # Specify the database type
+    db_type: qdrant
+    
+  # Option 2: Remote Qdrant server
+  qdrant_url:
+    # Connect to a Qdrant server at a specific URL
+    api_endpoint_env: QDRANT_URL
+    # Optional API key for authentication
+    api_key_env: QDRANT_API_KEY
+    # Set the collection name to use
+    index_name: nlweb_collection
+    # Specify the database type
+    db_type: qdrant
+
+  snowflake_cortex_search_1:
+    api_key_env: SNOWFLAKE_PAT
+    api_endpoint_env: SNOWFLAKE_ACCOUNT_URL
+    index_name: SNOWFLAKE_CORTEX_SEARCH_SERVICE
+    db_type: snowflake_cortex_search
+

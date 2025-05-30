@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="http://nlweb.ai/base"
+      xmlns:so="http://www.schema.org/"
+      xmlns:rdfs="http://www.w3.org/rdfs">
+
+<!-- This file has all the prompts that are used in the process of running a query. -->
+
+  <Thing>
+
+    <Prompt ref="DetectIrrelevantQueryPrompt">
+      <promptString>
+        The user is querying the site {request.site} which has information about {site.itemType}s.
+        Is the site utterly completely irrelevant to the user's query? 
+        The question is not whether this is the best site for answering the query, 
+        but if there is nothing on the site that is likely to be relevant for the query. 
+        If the site is irrelevant, add an explanation for why it is irrelevant. Otherwise, leave that field blank.
+        The user query is: '{request.query}'
+      </promptString>
+      <returnStruc>
+        {
+          "site_is_irrelevant_to_query": "True or False",
+          "explanation_for_irrelevance": "Explanation for why the site is irrelevant"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="PrevQueryDecontextualizer">
+      <promptString>
+        The user is querying the site {request.site} which has {site.itemType}s.
+        Does answering this query require access to earlier queries? 
+        If so, rewrite the query to decontextualize it so that it can be answered 
+        without reference to earlier queries. If not, don't change the query.
+        The user's query is: {request.rawQuery}. Previous queries were: {request.previousQueries}.
+      </promptString>
+      <returnStruc>
+        {
+          "requires_decontextualization": "True or False",
+          "decontextualized_query": "The rewritten query"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="DecontextualizeContextPrompt">
+      <promptString>
+        The user is asking the following question: '{request.rawQuery}' in the context of 
+        the an item with the following description: {request.contextDescription}. 
+        Rewrite the query to decontextualize it so that it can be answered 
+        without reference to earlier queries or to the item description.
+      </promptString>
+      <returnStruc>
+        {
+          "decontextualized_query": "The rewritten query"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="FullDecontextualizePrompt">
+      <promptString>
+        The user is asking the following question: '{request.rawQuery}' in the context of 
+        the an item with the following description: {request.contextDescription}. 
+        Previous queries from the user were: {request.previousQueries}.
+        Rewrite the query to decontextualize it so that it can be answered 
+        without reference to earlier queries or to the item description.
+      </promptString>
+      <returnStruc>
+        {
+          "decontextualized_query": "The rewritten query"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="DetectMemoryRequestPrompt">
+      <promptString>
+        Analyze the following statement from the user. 
+        Is the user asking you to remember, that may be relevant to not just this query, but also future queries? 
+        If so, what is the user asking us to remember?
+        The user should be explicitly asking you to remember something for future queries, 
+        not just expressing a requirement for the current query.
+        The user's query is: {request.rawQuery}.
+      </promptString>
+      <returnStruc>
+        {
+          "is_memory_request": "True or False",
+          "memory_request": "The memory request, if any"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="DetectMultiItemTypeQueryPrompt">
+      <promptString>
+        Analyze the following query from the user.
+        Is the user asking for only one kind of item or are they asking for multiple kinds of items.
+        If they are asking for multiple kinds of items, construct indepenent queries for each of the 
+        kinds of items, separated by semicolons. The user's query is: {request.query}.
+      </promptString>
+      <returnStruc>
+        {
+          "single_item_type_query": "True or False",
+          "item_queries": "Separate queries for each of the kinds of items, separated by commas"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="DetectItemTypePrompt">
+      <promptString>
+        What is the kind of item the query is likely seeking with this query: {request.query}
+      </promptString>
+      <returnStruc>
+        {
+          "item_type": ""
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="DetectQueryTypePrompt">
+      <promptString>
+        Analyze the following query from the user. 
+        Is the user asking for a list of {site.itemType} that match a certain description or are they asking for the
+        details of a particular {site.itemType}?
+        If the user for the details of a particular {site.itemType}, what is the name of the {site.itemType} and what
+        details are they asking for? The user's query is: {request.query}.
+      </promptString>
+      <returnStruc>
+        {
+          "item_details_query": "True or False",
+          "item_title": "The title of the item type, if any",
+          "details_being_asked": "what details the user is asking for"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="RankingPromptWithExplanation">
+      <promptString>
+        Assign a score between 0 and 100 to the following {site.itemType}
+        based on how relevant it is to the user's question. Use your knowledge from other sources, about the item, to make a judgement.
+        Provide a short description of the item that is relevant to the user's question, without mentioning the user's question.
+        Provide an explanation of the relevance of the item to the user's question, without mentioning the user's question or the score or explicitly mentioning the term relevance.
+        If the score is below 75, in the description, include the reason why it is still relevant.
+        The user's question is: {request.query}. The item's description is {item.description}
+      </promptString>
+      <returnStruc>
+        {
+          "score": "integer between 0 and 100",
+          "description": "short description of the item",
+          "explanation": "explanation of the relevance of the item to the user's question"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="RankingPrompt">
+      <promptString>
+        Assign a score between 0 and 100 to the following item
+        based on how relevant it is to the user's question. Use your knowledge from other sources, about the item, to make a judgement. 
+        If the score is above 50, provide a short description of the item highlighting the relevance to the user's question, without mentioning the user's question.
+        Provide an explanation of the relevance of the item to the user's question, without mentioning the user's question or the score or explicitly mentioning the term relevance.
+        If the score is below 75, in the description, include the reason why it is still relevant.
+        The user's question is: \"{request.query}\". The item's description in schema.org format is \"{item.description}\".
+      </promptString>
+      <returnStruc>
+        {
+          "score": "integer between 0 and 100",
+          "description": "short description of the item"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="RankingPromptForGenerate">
+      <promptString>
+        Assign a score between 0 and 100 to the following item
+        based on useful it might be to answering the user's question. 
+        The user's question is: \"{request.query}\".
+        The item in schema.org format is: \"{item.description}\". Include a 
+        short description of the item in the description field.
+      </promptString>
+      <returnStruc>
+        {
+          "score" : "integer between 0 and 100",
+          "description" : "short description of the item"
+        }
+      </returnStruc>
+    </Prompt>
+     
+    
+    <Prompt ref="SynthesizePromptForGenerate">
+      <promptString>
+        Given the following items, synthesize an answer to the user's question. 
+        You do not need to include all the items, but you should include the most relevant ones.
+        For each of the items included in the answer, provide the URL of the item in 
+        the 'urls' field of the structured output. Make sure to include 
+        the URL for every one of the items. Do not include the URL in the answer field.
+        The user's question is: {request.query}.
+        The items are: {request.answers}.
+      </promptString>
+      <returnStruc>
+        {
+          "answer" : "string",
+          "urls" : "urls of the items included in the answer"
+        }
+      </returnStruc>
+    </Prompt>
+
+     <Prompt ref="SummarizeResultsPrompt">
+      <promptString>
+        Given the following items, summarize the results as an answer to the user's question. `
+        The user's question is: {request.query}. 
+        The items are: {request.answers}.
+      </promptString>
+      <returnStruc>
+        {
+          "summary" : "string"
+        }
+      </returnStruc>
+    </Prompt>
+
+    <Prompt ref="DescriptionPromptForGenerate">
+      <promptString>
+        The item with the following description is used to answer the user's question. 
+        Please provide a description of the item, in the context of the user's question
+        and the overall answer.
+        The user's question is: {request.query}.
+        The overall answer is: {request.answer}.
+        The item is: {item.description}.
+      </promptString>
+      <returnStruc>
+        {
+          "description" : "string"
+        }
+      </returnStruc>
+    </Prompt>
+
+
+  </Thing>
+
+  <Recipe>
+    <Prompt ref="DetectMemoryRequestPrompt">
+      <promptString>
+        Analyze the following statement from the user. 
+        Is the user asking you to remember a dietary constraint, that may be relevant
+        to not just this query, but also future queries? For example, the user may say
+        that they are vegetarian or observe kosher or halal or specify an allergy.
+        If so, what is the user asking us to remember?
+        The user should be explicitly asking you to remember something for future queries, 
+        not just expressing a requirement for the current query.
+        The user's query is: {request.rawQuery}.
+      </promptString>
+      <returnStruc>
+        {
+          "is_memory_request": "True or False",
+          "memory_request": "The memory request, if any"
+        }
+      </returnStruc>
+    </Prompt>
+  </Recipe>
+
+  <RealEstate>
+    <Prompt ref="RequiredInfoPrompt">
+      <promptString>
+        Answering the user's query requires the location and price range.
+        Do you have this information from this
+        query or the previous queries or the context or memory about the user? 
+        The user's query is: {request.query}. The previous queries are: {request.previousQueries}.
+      </promptString>
+      <returnStruc>
+        {
+          "required_info_found": "True or False",
+          "user_question": "Question to ask the user for the required information"
+        }
+      </returnStruc>
+    </Prompt>
+  </RealEstate>
+
+</root>
